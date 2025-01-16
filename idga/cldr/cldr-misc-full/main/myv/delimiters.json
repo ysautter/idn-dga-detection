@@ -1,0 +1,18 @@
+{
+  "main": {
+    "myv": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "myv"
+      },
+      "delimiters": {
+        "quotationStart": "“",
+        "quotationEnd": "”",
+        "alternateQuotationStart": "‘",
+        "alternateQuotationEnd": "’"
+      }
+    }
+  }
+}

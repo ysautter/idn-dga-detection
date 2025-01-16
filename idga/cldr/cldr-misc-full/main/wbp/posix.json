@@ -1,0 +1,18 @@
+{
+  "main": {
+    "wbp": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "wbp"
+      },
+      "posix": {
+        "messages": {
+          "yesstr": "yes:y",
+          "nostr": "no:n"
+        }
+      }
+    }
+  }
+}

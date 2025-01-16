@@ -1,0 +1,18 @@
+{
+  "main": {
+    "tzm": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "tzm"
+      },
+      "posix": {
+        "messages": {
+          "yesstr": "Yeh:Y",
+          "nostr": "Uhu:U"
+        }
+      }
+    }
+  }
+}

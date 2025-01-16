@@ -1,0 +1,18 @@
+{
+  "main": {
+    "za": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "za"
+      },
+      "layout": {
+        "orientation": {
+          "characterOrder": "left-to-right",
+          "lineOrder": "top-to-bottom"
+        }
+      }
+    }
+  }
+}

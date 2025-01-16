@@ -1,0 +1,18 @@
+{
+  "main": {
+    "shn": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "shn"
+      },
+      "layout": {
+        "orientation": {
+          "characterOrder": "left-to-right",
+          "lineOrder": "top-to-bottom"
+        }
+      }
+    }
+  }
+}

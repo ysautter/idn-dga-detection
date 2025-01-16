@@ -1,0 +1,18 @@
+{
+  "main": {
+    "sma": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "sma"
+      },
+      "posix": {
+        "messages": {
+          "yesstr": "yes:y",
+          "nostr": "no:n"
+        }
+      }
+    }
+  }
+}

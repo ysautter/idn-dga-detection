@@ -1,0 +1,18 @@
+{
+  "main": {
+    "mus": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "mus"
+      },
+      "posix": {
+        "messages": {
+          "yesstr": "yes:y",
+          "nostr": "no:n"
+        }
+      }
+    }
+  }
+}

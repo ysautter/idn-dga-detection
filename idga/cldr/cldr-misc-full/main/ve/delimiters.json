@@ -1,0 +1,18 @@
+{
+  "main": {
+    "ve": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "ve"
+      },
+      "delimiters": {
+        "quotationStart": "“",
+        "quotationEnd": "”",
+        "alternateQuotationStart": "‘",
+        "alternateQuotationEnd": "’"
+      }
+    }
+  }
+}

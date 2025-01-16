@@ -1,0 +1,18 @@
+{
+  "main": {
+    "arn": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "arn"
+      },
+      "delimiters": {
+        "quotationStart": "“",
+        "quotationEnd": "”",
+        "alternateQuotationStart": "‘",
+        "alternateQuotationEnd": "’"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "main": {
+    "gez": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "gez"
+      },
+      "delimiters": {
+        "quotationStart": "“",
+        "quotationEnd": "”",
+        "alternateQuotationStart": "‘",
+        "alternateQuotationEnd": "’"
+      }
+    }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "main": {
+    "trw": {
+      "identity": {
+        "version": {
+          "_cldrVersion": "45"
+        },
+        "language": "trw"
+      },
+      "delimiters": {
+        "quotationStart": "“",
+        "quotationEnd": "”",
+        "alternateQuotationStart": "‘",
+        "alternateQuotationEnd": "’"
+      }
+    }
+  }
+}
