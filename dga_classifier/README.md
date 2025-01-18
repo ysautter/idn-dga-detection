@@ -7,10 +7,12 @@ To start, execute the main.py file. The architecture, training parameters and ex
 For a minimal working example use the following parameters.
 
 ```
-FINE_TUNING=True
-MODEL=DeBERTaV3
-BENIGN_DATASET=data/mock/fine-tuning/binary/benign_mock_data.csv
-MAL_DATASET=data/mock/fine-tuning/binary/mal_mock_data.csv
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/../"
+export FINE_TUNING=True
+export MODEL=DeBERTaV3
+export BENIGN_DATASET=data/mock/fine-tuning/binary/benign_mock_data.csv
+export MAL_DATASET=data/mock/fine-tuning/binary/mal_mock_data.csv
+python main.py
 ```
 
 For an example of different pre-training, fine-tuning and IDN analysis environments checkout `.env.template`
