@@ -111,7 +111,8 @@ def generate_domains(date, config):
         yield from domains_for_day(days + j, config)
 
 
-def gen_iagds(amount=1000):
+# Note, the function signature needs to stay the same
+def gen_iagds(amount=1000, target_charset: str = "lang:ja"):
     domains = []
     today = datetime.now()
     days = [(today - timedelta(days=i)) for i in range(3 * 365)]

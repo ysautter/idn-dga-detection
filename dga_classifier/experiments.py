@@ -28,7 +28,7 @@ logger = logging.getLogger("dga_classifier.experiments")
 settings = get_settings()
 
 
-def run_balanced_idn_analysis(model, tokenizer, tokenization):
+def run_balanced_idn_analysis():
     # Run 5 fold-cross validation training on everything available unbalanced
     # When evaluating, take notice of benign languages and how they are evaluated
     logger.info("\n\n\n #### Starting Balanced IDN Analysis ####")
@@ -38,20 +38,17 @@ def run_balanced_idn_analysis(model, tokenizer, tokenization):
     idgas = __get_all_idgas(exclude_scripts=True)
 
     logger.info(f"Train on {idgas}")
-    result["no_idn_training"] = run(model, tokenizer, tokenization)
+    result["no_idn_training"] = run()
     result["balanced"] = run(
-        model,
-        tokenizer,
-        tokenization,
         include_idga=idgas,
         balanced_idn_training=True,
     )
-    result["unbalanced"] = run(model, tokenizer, tokenization, include_idga=idgas)
+    result["unbalanced"] = run(include_idga=idgas)
     name = get_name()
     save_metrics(name, result)
 
 
-def run_real_world_evaluation(model, tokenizer, tokenization):
+def run_real_world_evaluation():
     logger.info("\n\n\n #### Starting Real World Study ####")
     logger.info("\n\n")
     for i in range(5):
@@ -59,37 +56,29 @@ def run_real_world_evaluation(model, tokenizer, tokenization):
         seed = 43 + i
         set_seed(seed)
         logger.info(f"Setting seed to: {seed}")
-        result = run(
-            model, tokenizer, tokenization, evaluate_idgas=False, rw_iteration=i
-        )
+        result = run(rw_iteration=i)
         name = get_name()
         save_metrics(name, result, folder="rw")
 
 
-def run_idga_evaluation(model, tokenizer, tokenization):
-    result = run(model, tokenizer, tokenization, evaluate_idgas=True)[0]
+def run_idga_evaluation():
+    result = run(evaluate_idgas=True)[0]
     result["idga"] = "No IDN Trained"
     df = pd.DataFrame([result])
     formatted_name = time.strftime("%Y%m%d-%H%M%S") + "_" + get_name() + ".csv"
     df.to_csv(f"evaluations/idga/{formatted_name}", index=False)
 
 
-def run_idga_trained_evaluation(model, tokenizer, tokenization):
+def run_idga_trained_evaluation():
     all_idgas = __get_all_idgas()
-    result = run(
-        model,
-        tokenizer,
-        tokenization,
-        evaluate_idgas=True,
-        include_idga=all_idgas,
-    )[0]
+    result = run(evaluate_idgas=True, include_idga=all_idgas)[0]
     result["idga"] = "IDN Trained"
     df = pd.DataFrame([result])
     formatted_name = time.strftime("%Y%m%d-%H%M%S") + "_" + get_name() + ".csv"
     df.to_csv(f"evaluations/idga/{formatted_name}", index=False)
 
 
-def run_include_only_one_script_analysis(model, tokenizer, tokenization):
+def run_include_only_one_script_analysis():
     # Include only a single script
     results = []
     idgas = __get_all_idgas(exclude_languages=True)
@@ -136,9 +125,6 @@ def run_include_only_one_script_analysis(model, tokenizer, tokenization):
 
         logger.info(f"Including {script} -> Train on {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -151,7 +137,7 @@ def run_include_only_one_script_analysis(model, tokenizer, tokenization):
     df.to_csv(f"evaluations/idga/{formatted_name}", index=False)
 
 
-def run_leave_one_script_out_analysis(model, tokenizer, tokenization):
+def run_leave_one_script_out_analysis():
     # Leave the script including the languages of the script out
     results = []
     idgas = __get_all_idgas(exclude_languages=True)
@@ -200,9 +186,6 @@ def run_leave_one_script_out_analysis(model, tokenizer, tokenization):
 
         logger.info(f"Excluding {script} -> Train on {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -215,7 +198,7 @@ def run_leave_one_script_out_analysis(model, tokenizer, tokenization):
     df.to_csv(f"evaluations/idga/{formatted_name}", index=False)
 
 
-def run_include_only_one_language_analysis(model, tokenizer, tokenization):
+def run_include_only_one_language_analysis():
     results = []
     idgas = __get_all_idgas(exclude_scripts=True)
     languages = [
@@ -268,9 +251,6 @@ def run_include_only_one_language_analysis(model, tokenizer, tokenization):
 
         logger.info(f"Including {lang} -> Train on {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -283,7 +263,7 @@ def run_include_only_one_language_analysis(model, tokenizer, tokenization):
     df.to_csv(f"evaluations/idga/{formatted_name}", index=False)
 
 
-def run_leave_one_language_out_analysis(model, tokenizer, tokenization):
+def run_leave_one_language_out_analysis():
     results = []
     idgas = __get_all_idgas(exclude_scripts=True)
     languages = [
@@ -337,9 +317,6 @@ def run_leave_one_language_out_analysis(model, tokenizer, tokenization):
 
         logger.info(f"Excluding {lang} -> Train on {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -352,7 +329,7 @@ def run_leave_one_language_out_analysis(model, tokenizer, tokenization):
     df.to_csv(f"{settings.evaluation_folder}/idga/{formatted_name}", index=False)
 
 
-def run_include_only_one_idga_analysis(model, tokenizer, tokenization):
+def run_include_only_one_idga_analysis():
     results = []
     all_idgas_variants = __get_all_idgas(exclude_scripts=False)
     all_idgas = set([idga.split("-")[0] for idga in all_idgas_variants])
@@ -363,9 +340,6 @@ def run_include_only_one_idga_analysis(model, tokenizer, tokenization):
         ]
         logger.info(f"Including {include_idga} -> Train on {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -377,7 +351,7 @@ def run_include_only_one_idga_analysis(model, tokenizer, tokenization):
     df.to_csv(f"{settings.evaluation_folder}/idga/{formatted_name}", index=False)
 
 
-def run_leave_one_idga_out_analysis(model, tokenizer, tokenization):
+def run_leave_one_idga_out_analysis():
     results = []
     all_idgas_variants = __get_all_idgas(exclude_scripts=False)
     all_idgas = set([idga.split("-")[0] for idga in all_idgas_variants])
@@ -388,9 +362,6 @@ def run_leave_one_idga_out_analysis(model, tokenizer, tokenization):
         ]
         logger.info(f"Excluding {except_idga} -> Train on {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -402,20 +373,17 @@ def run_leave_one_idga_out_analysis(model, tokenizer, tokenization):
     df.to_csv(f"{settings.evaluation_folder}/idga/{formatted_name}", index=False)
 
 
-def run_include_only_one_idga_variant_analysis(model, tokenizer, tokenization):
+def run_include_only_one_idga_variant_analysis():
     results = []
     idgas = __get_all_idgas(exclude_scripts=False)
     idgas.sort()
     parts = np.linspace(0, len(idgas), 21, endpoint=True, dtype=int)
     selected_range = range(parts[settings.iooiv_index], parts[settings.iooiv_index + 1])
-    print("Selected range", selected_range)
+    logger.info("Selected range", selected_range)
     for i in selected_range:
         idga = idgas[i]
-        print(f"Training includes IDGA {idga}")
+        logger.info(f"Training includes IDGA {idga}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=[idga],
             evaluate_idgas=True,
             single_fold=True,
@@ -430,25 +398,22 @@ def run_include_only_one_idga_variant_analysis(model, tokenizer, tokenization):
     )
 
 
-def run_leave_one_idga_variant_out_analysis(model, tokenizer, tokenization):
+def run_leave_one_idga_variant_out_analysis():
     results = []
     idgas = __get_all_idgas(exclude_scripts=False)
     idgas.sort()
     parts = np.linspace(0, len(idgas), settings.loivo_split_n, endpoint=True, dtype=int)
     selected_range = range(parts[settings.loivo_index], parts[settings.loivo_index + 1])
-    print("LOIVO INDEX:", settings.loivo_index)
-    print("Selected range:", selected_range)
-    print("Range includes IDGAS:", [idgas[i] for i in selected_range])
+    logger.info("LOIVO INDEX:", settings.loivo_index)
+    logger.info("Selected range:", selected_range)
+    logger.info("Range includes IDGAS:", [idgas[i] for i in selected_range])
     for i in selected_range:
         left_out_idga = idgas[i]
-        print(f"Leave {left_out_idga} out")
+        logger.info(f"Leave {left_out_idga} out")
         train_on_idgas = [idga for idga in idgas if idga != left_out_idga]
         # train_on_idgas = idgas[:i] + idgas[i + 1 :]
-        print(f"Train on IDGAS: {train_on_idgas}")
+        logger.info(f"Train on IDGAS: {train_on_idgas}")
         result = run(
-            model,
-            tokenizer,
-            tokenization,
             include_idga=train_on_idgas,
             evaluate_idgas=True,
             single_fold=True,
@@ -464,14 +429,14 @@ def run_leave_one_idga_variant_out_analysis(model, tokenizer, tokenization):
     )
 
 
-def run_statistical_analysis(model, tokenizer, tokenization):
+def run_statistical_analysis():
     logger.info("\n\n\n #### Starting Statistical Analysis ####")
     logger.info("\n\n")
     for i in range(10):
         seed = 43 + i
         set_seed(seed)
         logger.info(f"Setting seed to: {seed}")
-        result = run(model, tokenizer, tokenization, evaluate_idgas=False)
+        result = run()
         name = get_name()
         name += f"-{seed}"
         logger.info("Saving run")

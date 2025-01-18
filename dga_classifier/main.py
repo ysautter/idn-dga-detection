@@ -72,93 +72,54 @@ set_seed(42)
 
 
 def main():
-    # Setting Up Models
-    model = settings.model
-    logger.info(f"Selected model {model}")
+    logger.info(f"Selected model {settings.model}")
 
     if settings.pre_training:
         return DeBERTa.pre_train()
 
-    tokenizer = None
-    if settings.domain_tokenizer:
-        tokenizer = DeBERTa.get_tokenizer()
-    else:
-        if "RoBERTa" == model and settings.fine_tuning:
-            tokenizer = AutoTokenizer.from_pretrained("roberta-base")
-        if "BERT" == model or "Encoder" == model and settings.fine_tuning:
-            tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
-        if "DeBERTaV3" == model or "DomainBERT" == model:
-            tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-base")
-        if "DistilBERT" == model and settings.fine_tuning:
-            tokenizer = AutoTokenizer.from_pretrained("distilbert/distilbert-base-uncased")
-        if "XLM-Roberta" == model and settings.fine_tuning:
-            tokenizer = AutoTokenizer.from_pretrained("FacebookAI/xlm-roberta-base")
-
-    if settings.classification_task == "binary":
-        model_max_length = 63  # 253 + start and end token?
-    else:
-        model_max_length = 253
-
-    def tokenization(example):
-        example = example["domain"]
-        example = [el.lower() for el in example]
-        if tokenizer:
-            return tokenizer(example, padding="max_length", max_length=model_max_length)
-        else:
-            element = example
-            mapping = list(map(char_to_int.get, element))
-            length = model_max_length - len(mapping)
-            padded = np.pad(mapping, (0, length)).tolist()
-            processed_element = {
-                "input_ids": padded,
-                "attention_mask": [el if el == 0 else 1 for el in padded],
-                "token_type_ids": [0] * len(padded),
-            }
-            return processed_element
-
     if settings.include_only_one_idga_variant_analysis:
-        run_include_only_one_idga_variant_analysis(model, tokenizer, tokenization)
+        run_include_only_one_idga_variant_analysis()
 
     if settings.leave_one_idga_variant_out_analysis:
-        run_leave_one_idga_variant_out_analysis(model, tokenizer, tokenization)
+        run_leave_one_idga_variant_out_analysis()
 
     if settings.leave_one_idga_out_analysis:
-        run_leave_one_idga_out_analysis(model, tokenizer, tokenization)
+        run_leave_one_idga_out_analysis()
 
     if settings.include_only_one_idga_analysis:
-        run_include_only_one_idga_analysis(model, tokenizer, tokenization)
+        run_include_only_one_idga_analysis()
 
     if settings.leave_one_language_out_analysis:
-        run_leave_one_language_out_analysis(model, tokenizer, tokenization)
+        run_leave_one_language_out_analysis()
 
     if settings.include_only_one_language_analysis:
-        run_include_only_one_language_analysis(model, tokenizer, tokenization)
+        run_include_only_one_language_analysis()
 
     if settings.leave_one_script_out_analysis:
-        run_leave_one_script_out_analysis(model, tokenizer, tokenization)
+        run_leave_one_script_out_analysis()
 
     if settings.include_only_one_script_analysis:
-        run_include_only_one_script_analysis(model, tokenizer, tokenization)
+        run_include_only_one_script_analysis()
 
     if settings.idga_evaluation:
-        run_idga_evaluation(model, tokenizer, tokenization)
+        run_idga_evaluation()
 
     if settings.idga_trained_evaluation:
-        run_idga_trained_evaluation(model, tokenizer, tokenization)
+        run_idga_trained_evaluation()
 
     if settings.normal_run:
-        result = run(model, tokenizer, tokenization, evaluate_idgas=False)
+        result = run()
         name = get_name()
         save_metrics(name, result)
 
     if settings.real_world_study:
-        run_real_world_evaluation(model, tokenizer, tokenization)
+        run_real_world_evaluation()
 
     if settings.statistical_analysis:
-        run_statistical_analysis(model, tokenizer, tokenization)
+        run_statistical_analysis()
 
     if settings.balanced_idn_analysis:
-        run_balanced_idn_analysis(model, tokenizer, tokenization)
+        run_balanced_idn_analysis()
 
 
 if __name__ == "__main__":

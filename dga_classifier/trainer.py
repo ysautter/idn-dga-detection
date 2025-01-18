@@ -31,7 +31,7 @@ from sklearn.model_selection import StratifiedKFold
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from torch.nn import CrossEntropyLoss
-
+from transformers import AutoTokenizer
 
 from transformers.modeling_outputs import SequenceClassifierOutput
 
@@ -47,7 +47,7 @@ from dga_classifier.data.dataset import (
     get_idn_data,
     get_dataset,
     rw_eval_dgas,
-    label_to_int,
+    label_to_int, char_to_int,
 )
 
 LOG_EVERY = 500
@@ -55,21 +55,57 @@ EVAL_EVERY = 0.5
 
 logger = logging.getLogger("dga_classifier.trainer")
 
+
 def run(
-        model,
-        tokenizer,
-        tokenization,
         include_idga: List[str] = None,
         evaluate_idgas: bool = False,
         rw_iteration: int = 0,
         single_fold: bool = False,
         balanced_idn_training: bool = False,
 ):
+
+    model = settings.model
+
+    tokenizer = None
+    if settings.domain_tokenizer:
+        tokenizer = DeBERTa.get_tokenizer()
+    else:
+        if "RoBERTa" == model and settings.fine_tuning:
+            tokenizer = AutoTokenizer.from_pretrained("roberta-base")
+        if "BERT" == model or "Encoder" == model and settings.fine_tuning:
+            tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+        if "DeBERTaV3" == model or "DomainBERT" == model:
+            tokenizer = AutoTokenizer.from_pretrained("microsoft/deberta-v3-base")
+        if "DistilBERT" == model and settings.fine_tuning:
+            tokenizer = AutoTokenizer.from_pretrained("distilbert/distilbert-base-uncased")
+        if "XLM-Roberta" == model and settings.fine_tuning:
+            tokenizer = AutoTokenizer.from_pretrained("FacebookAI/xlm-roberta-base")
+
+    def tokenization(example):
+        example = example["domain"]
+        example = [el.lower() for el in example]
+        if settings.classification_task == "binary":
+            model_max_length = 63  # 253 + start and end token?
+        else:
+            model_max_length = 253
+        if tokenizer:
+            return tokenizer(example, padding="max_length", max_length=model_max_length)
+        else:
+            element = example
+            mapping = list(map(char_to_int.get, element))
+            length = model_max_length - len(mapping)
+            padded = np.pad(mapping, (0, length)).tolist()
+            processed_element = {
+                "input_ids": padded,
+                "attention_mask": [el if el == 0 else 1 for el in padded],
+                "token_type_ids": [0] * len(padded),
+            }
+            return processed_element
+
     # Load Data
     domains, labels = get_data(
         preprocess=False,
         tokenizer=tokenizer,
-        pre_train=False,
         include_idga=include_idga,
         rw_iteration=rw_iteration,
         balanced_idn_training=balanced_idn_training,
@@ -183,7 +219,7 @@ def run(
                 )
 
             case "ResNet":
-                trained_model = ResNet.train(train_dataset, eval_dataset, tokenizer)
+                trained_model = ResNet.train(train_dataset, eval_dataset)
 
         if trained_model is None:
             continue
@@ -206,8 +242,6 @@ def run(
             rw_domains, rw_labels = get_data(
                 preprocess=False,
                 tokenizer=tokenizer,
-                pre_train=False,
-                eval_different_dataset=False,
                 evaluate_rw=True,
             )
             rw_domains = np.array(rw_domains)
@@ -251,8 +285,6 @@ def run(
             idn_domains, idn_labels = get_data(
                 preprocess=False,
                 tokenizer=tokenizer,
-                pre_train=False,
-                eval_different_dataset=False,
                 evaluate_rw=False,
                 evaluate_balanced_idn=True,
             )

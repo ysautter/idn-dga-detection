@@ -22,7 +22,10 @@ from dga_classifier.models.DeBERTa.DeBERTa_official.DeBERTa.apps.run import (
     run_eval,
     create_model,
 )
+# Although load_tasks and rtd_task are not used here, these modules need to initialize which is done during import
 from dga_classifier.models.DeBERTa.DeBERTa_official.DeBERTa.apps.tasks import (
+    load_tasks,
+    rtd_task,
     get_task,
 )
 from dga_classifier.models.DeBERTa.DeBERTa_official.DeBERTa.deberta import load_vocab, tokenizers

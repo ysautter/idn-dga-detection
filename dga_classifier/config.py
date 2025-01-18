@@ -36,6 +36,18 @@ class Settings(BaseSettings):
             raise ValueError(f"{value} is not an allowed model. Allowed models are {allowed_models}.")
         return value
 
+    bert_size: str = "base"
+
+    classification_task: str = "binary"
+    @field_validator("classification_task", mode="after")
+    @classmethod
+    def valid_classification_task(cls, value: str):
+        allowed_classification_task = ["multiclass", "binary"]
+        if value not in allowed_classification_task:
+            raise ValueError(f"{value} is not an allowed classification_task. "
+                             f"Allowed classification tasks are {allowed_classification_task}.")
+        return value
+
     # Datasets
     benign_dataset: Optional[str] = None
     mal_dataset: Optional[str] = None
@@ -43,10 +55,10 @@ class Settings(BaseSettings):
     benign_multiclass_dataset: Optional[str] = None
     mal_multiclass_dataset: Optional[str] = None
 
-    benign_rw_train_dataset: Optional[str] = None
-    mal_rw_train_dataset: Optional[str] = None
-    benign_rw_eval_dataset: Optional[str] = None
-    mal_rw_eval_dataset: Optional[str] = None
+    benign_rw_dataset: Optional[str] = None
+    mal_rw_dataset: Optional[str] = None
+    benign_rw_test_dataset: Optional[str] = None
+    mal_rw_test_dataset: Optional[str] = None
 
     # IDN Datasets
     idn_data_mal: Optional[str] = None
@@ -68,10 +80,10 @@ class Settings(BaseSettings):
     single_fold: bool = False
 
     pretrained_model_path: Optional[str] = None
+    use_pretrained_bert_model: bool = False
 
-    idga_analysis: bool = False
-    idga_evaluation: bool = False
-    idga_trained_evaluation: bool = False
+    idga_evaluation: bool = False  # Use for generating ∅
+    idga_trained_evaluation: bool = False  # Use for generating U
     normal_run: bool = True
 
     balanced_idn_analysis: bool = False
@@ -104,18 +116,15 @@ class Settings(BaseSettings):
 
     statistical_analysis: bool = False
 
-    evaluation_folder: str = "evaluations"
+    real_world_study: bool = False
 
     resume_from_checkpoint: bool = False
-    use_pretrained_bert_model: bool = False
+
     train_batch_size: int = 128
     eval_batch_size: int = 128
     learning_rate: float = 1e-5
     warmup_ratio: float = 0.2
-    bert_size: str = "base"
-    classification_task: str = "binary"
-    checkpoints_folder: str = "checkpoints"
-    project_name: str = "DGA Classifier"
+
     deberta_data_dir: Optional[str] = None
     deberta_train_batch_size: int = 256
     deberta_eval_batch_size: int = 256
@@ -129,11 +138,13 @@ class Settings(BaseSettings):
     deberta_vocab_path: Optional[str] = None
     deberta_num_training_steps: int = 1_000_000
 
-    real_world_study: bool = False
+
+    project_name: str = "DGA Classifier"
+    checkpoints_folder: str = "checkpoints"
+    evaluation_folder: str = "evaluations"
 
     def __check_idn_training(self):
         return any([
-            self.idga_analysis,
             self.idga_evaluation,
             self.idga_trained_evaluation,
             self.balanced_idn_analysis,
@@ -157,12 +168,16 @@ class Settings(BaseSettings):
             raise ValueError("If DOMAIN_TOKENIZER is True, "
                              "the vocabulary is required by setting DEBERTA_VOCAB_PATH.")
 
-        if self.real_world_study and (self.benign_rw_train_dataset is None or
-                                      self.mal_rw_train_dataset is None or
-                                      self.benign_rw_eval_dataset is None or
-                                      self.mal_rw_eval_dataset is None):
-            raise ValueError("When performing the real-world study the datasets BENIGN_RW_TRAIN_DATASET, "
-                             "MAL_RW_TRAIN_DATASET, BENIGN_RW_EVAL_DATASET and MAL_RW_EVAL_DATASET are required.")
+        if self.real_world_study and (self.benign_rw_dataset is None or
+                                      self.mal_rw_dataset is None or
+                                      self.benign_rw_test_dataset is None or
+                                      self.mal_rw_test_dataset is None):
+            raise ValueError("When performing the real-world study the datasets BENIGN_RW_DATASET, "
+                             "MAL_RW_DATASET, BENIGN_RW_TEST_DATASET and MAL_RW_TEST_DATASET are required.")
+
+        if self.real_world_study and self.mal_rw_dataset is not None and not self.mal_rw_dataset.endswith("_x.csv"):
+            raise ValueError("When performing the real-world study the dataset MAL_RW_DATASET "
+                             "needs to end with _x.csv, as x is substituted by numbers from 0 to 9")
 
         if (self.fine_tuning and self.__check_idn_training() and
                 (self.idn_data_benign is None or self.idn_data_mal is None)):
@@ -176,8 +191,13 @@ class Settings(BaseSettings):
             raise ValueError("When performing the BALANCED_IDN_ANALYSIS the datasets IDN_DATA_BENIGN, IDN_DATA_MAL, "
                              "IDN_DATA_BENIGN_TEST and IDN_DATA_MAL_TEST are required.")
 
-        if self.fine_tuning and (self.benign_dataset is None or self.mal_dataset is None):
-            raise ValueError("When performing FINE_TUNING, BENIGN_DATASET and MAL_DATASET are required.")
+        if self.fine_tuning and self.classification_task == "binary" and (self.benign_dataset is None or self.mal_dataset is None):
+            raise ValueError("When performing FINE_TUNING on the binary classification task, "
+                             "BENIGN_DATASET and MAL_DATASET are required.")
+
+        if self.fine_tuning and self.classification_task == "multiclass" and (self.benign_multiclass_dataset is None or self.mal_multiclass_dataset is None):
+            raise ValueError("When performing FINE_TUNING on the multiclass classification task, "
+                             "BENIGN_MULTICLASS_DATASET and MAL_MULTICLASS_DATASET are required.")
 
         if self.pre_training and (self.model != "DomainBERT" and self.model != "DeBERTaV3"):
             raise ValueError("Pretraining is only available for DomainBERT and DeBERTaV3.")

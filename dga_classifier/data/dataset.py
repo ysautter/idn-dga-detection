@@ -225,11 +225,11 @@ BENIGN_DATASET = settings.benign_dataset
 MAL_DATASET = settings.mal_dataset
 
 # Real-World train and eval dataset
-BENIGN_RW_EVAL_DATASET = settings.benign_rw_eval_dataset
-MAL_RW_EVAL_DATASET = settings.mal_rw_eval_dataset
+BENIGN_RW_TEST_DATASET = settings.benign_rw_test_dataset
+MAL_RW_TEST_DATASET = settings.mal_rw_test_dataset
 
-BENIGN_RW_TRAIN_DATASET = settings.benign_rw_train_dataset
-MAL_RW_TRAIN_DATASET = settings.mal_rw_train_dataset
+BENIGN_RW_DATASET = settings.benign_rw_dataset
+MAL_RW_DATASET = settings.mal_rw_dataset
 
 # Multiclass datasets
 MAL_MULTICLASS_DATASET = settings.mal_multiclass_dataset
@@ -291,8 +291,6 @@ def get_datasets(
 def get_data(
     preprocess: bool = True,
     tokenizer=None,
-    pre_train: bool = False,
-    eval_different_dataset: bool = False,
     include_idga: List[str] = None,
     evaluate_rw: bool = False,
     rw_iteration: int = 0,
@@ -300,8 +298,8 @@ def get_data(
     evaluate_balanced_idn: bool = False,
 ):
     if evaluate_rw:
-        mal = pd.read_csv(MAL_RW_EVAL_DATASET, header=None)
-        benign = pd.read_csv(BENIGN_RW_EVAL_DATASET, header=None)
+        mal = pd.read_csv(MAL_RW_TEST_DATASET, header=None)
+        benign = pd.read_csv(BENIGN_RW_TEST_DATASET, header=None)
     elif evaluate_balanced_idn:
         mal = pd.read_csv(IDN_DATA_MAL_TEST, header=None)
         mal.columns = ["domain", "label"]
@@ -309,14 +307,14 @@ def get_data(
 
         benign = pd.read_csv(IDN_DATA_BENIGN_TEST, header=None)
         benign.columns = ["domain", "label", "lang"]
-        benign["lang"].replace("zh-cn", "zh", inplace=True)
+        benign["lang"] = benign["lang"].replace("zh-cn", "zh")
     else:
         if settings.classification_task == "binary":
             if settings.real_world_study:
                 mal = pd.read_csv(
-                    MAL_RW_TRAIN_DATASET.replace("x", str(rw_iteration)), header=None
+                    MAL_RW_DATASET.replace("x", str(rw_iteration)), header=None
                 )
-                benign = pd.read_csv(BENIGN_RW_TRAIN_DATASET, header=None)
+                benign = pd.read_csv(BENIGN_RW_DATASET, header=None)
             else:
                 mal = pd.read_csv(MAL_DATASET, header=None)
                 benign = pd.read_csv(BENIGN_DATASET, header=None)
@@ -390,7 +388,7 @@ def get_idn_data(
     benign = pd.read_csv(IDN_DATA_BENIGN, header=None)
 
     benign.columns = ["domain", "label", "lang"]
-    benign["lang"].replace("zh-cn", "zh", inplace=True)
+    benign["lang"] = benign["lang"].replace("zh-cn", "zh")
 
     if idga is not None:
         mal = mal[mal["label"].isin(idga)]
