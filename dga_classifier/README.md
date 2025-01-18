@@ -92,7 +92,7 @@ Additionally, the following environment variables are set, to configure the data
 The pre-training data is set using the `DEBERTA_DATA_DIR` environment variable.
 The folder defined with this variable needs to contain the files `train.txt` and `valid.txt`.
 Both files should have been produced using the tokenizer defined using the `DEBERTA_VOCAB_PATH` variable.
-See `dga_classifier/models/DeBERTa/DeBERTa_official/experiments/language_model/prepare_data.py` and the corresponding [README](dga_classifier/models/DeBERTa/DeBERTa_official/experiments/language_model/README.md) for an example on how to tokenize the data for pre-training.
+See `dga_classifier/models/DeBERTa/DeBERTa_official/experiments/language_model/prepare_data.py` and the corresponding [README](models/DeBERTa/DeBERTa_official/experiments/language_model/README.md) for an example on how to tokenize the data for pre-training.
 
 Mock data can be found in `data/mock/pre-training`.
 
