@@ -2,7 +2,7 @@
  and adapted to output IDNs."""
 import argparse
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 import time
 import string
 
@@ -59,38 +59,28 @@ def dga(date, seed, amount: int = 200, target_charset: str = "lang:ja"):
 def gen_iagds(amount=1000, target_charset: str = "lang:ja"):
     seeds = ["89f5", "4449", "E1F1", "E1F2", "E08A", "E1F5"]
     d = datetime.now()
-    domains = []
-    for seed in seeds:
-        domains.extend(
-            dga(
-                d,
-                int(seed, 16),
-                amount=int(amount / len(seeds)),
-                target_charset=target_charset,
+    domains = set()
+    while len(domains) <= amount:
+        for seed in seeds:
+            domains.update(
+                dga(
+                    d,
+                    int(seed, 16),
+                    amount=int(amount / len(seeds)),
+                    target_charset=target_charset,
+                )
             )
-        )
+            if len(domains) >= amount:
+                break
+        d += timedelta(days=1)
+        if len(domains) >= amount:
+            break
+    domains = list(domains)
+    if len(domains) >= amount:
+        domains = domains[:amount]
     return domains
 
 
 if __name__ == "__main__":
-    gen_iagds()
-    exit
-    seeds = ["89f5", "4449", "E1F1", "E1F2", "E08A", "E1F5"]
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-d", "--date", help="date for which to generate domains")
-    parser.add_argument(
-        "-s", "--seed", help="seed as hexstring", choices=seeds, default="e08a"
-    )
-    parser.add_argument("-a", "--all-seeds", action="store_true", help="use all seeds")
-    args = parser.parse_args()
-
-    if args.date:
-        d = datetime.strptime(args.date, "%Y-%m-%d")
-    else:
-        d = datetime.now()
-
-    if not args.all_seeds:
-        seeds = [args.seed]
-
-    for seed in seeds:
-        dga(d, int(seed, 16))
+    iagds = gen_iagds()
+    print(len(iagds))
