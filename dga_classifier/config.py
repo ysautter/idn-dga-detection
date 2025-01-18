@@ -191,7 +191,7 @@ class Settings(BaseSettings):
             raise ValueError("When performing the BALANCED_IDN_ANALYSIS the datasets IDN_DATA_BENIGN, IDN_DATA_MAL, "
                              "IDN_DATA_BENIGN_TEST and IDN_DATA_MAL_TEST are required.")
 
-        if self.fine_tuning and self.classification_task == "binary" and (self.benign_dataset is None or self.mal_dataset is None):
+        if self.fine_tuning and self.classification_task == "binary" and not self.real_world_study and (self.benign_dataset is None or self.mal_dataset is None):
             raise ValueError("When performing FINE_TUNING on the binary classification task, "
                              "BENIGN_DATASET and MAL_DATASET are required.")
 
